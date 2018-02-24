@@ -154,20 +154,14 @@ def get_start_time(date=None):
         return
 
 
-def remove_exist_file(file=''):
-    if len(file) == 0:
-        return
-
-    if os.path.exists(file):
-        os.remove(file)
-
-
+# 所有问题的excel表格文件名
 def totoal_info_excel_file_name():
     tail = '.xlsx'
     date = utils.today
     return utils.get_file_path(tail, date), utils.get_file_prefix_name(tail, date)
 
 
+# 输出指定日期内的舆情关键词统计数据
 def out_put_all_statistic(begin, end):
     array = [[], [], [], [], [], []]
     for i in range((end - begin).days + 1):
@@ -188,6 +182,7 @@ def out_put_all_statistic(begin, end):
     draw_graphic.out_put_graphic(dict(zip(keyword_label_array, array)), keyword_label_array)
 
 
+# 输出指定日期的舆情关键词统计数据
 def out_put_today_statistic(today):
     stuck = int(get_key_words_count(KEYWORD_STUCK))
     danmu = int(get_key_words_count(KEYWORD_DANMU))
@@ -201,6 +196,7 @@ def out_put_today_statistic(today):
     return stuck, danmu, crash, total
 
 
+# 开始统计工作
 def make_statistic(topK, is_test=False):
     # 获得开始时间参数
     get_start_time(utils.today)
@@ -228,27 +224,6 @@ def make_statistic(topK, is_test=False):
     return sub, html
 
 
-def main():
-    USAGE = "usage:    python service.py -d [the day before today] -k [topK] --kw [key words]"
-
-    parser = OptionParser(USAGE)
-    parser.add_option("-d", dest="the_day_before_today")
-    parser.add_option("-k", dest="topK")
-    parser.add_option("--kw", dest="key_words")
-    opt, args = parser.parse_args()
-
-    if opt.topK is None:
-        topK = 8
-    else:
-        topK = int(opt.topK)
-
-    if opt.key_words is None:
-        key_words = ""
-    else:
-        key_words = str(opt.key_words)
-
-
 if __name__ == '__main__':
-    # main()
     get_start_time()
     get_all_key_word_content(8)

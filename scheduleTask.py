@@ -37,6 +37,7 @@ def timming_exe(cmd, inc=60):
     schedule.run()
 
 
+# 发送邮件
 def send_mail_with_html(sub, html, is_test=False):
     me = "吴磊" + "<" + MAIL_USER + "@" + MAIL_POSTFIX + ">"
     msg = MIMEMultipart()
@@ -74,6 +75,7 @@ def send_mail_with_html(sub, html, is_test=False):
         return False
 
 
+# 休眠逻辑
 def time_to_sleep():
     from datetime import datetime
     cur_time = datetime.now()
@@ -91,12 +93,14 @@ def time_to_sleep():
     return skip_seconds
 
 
+# 定时任务
 def schedule_job(cmd, inc):
     send_yuqing_mail(is_test=False)
     schedule.enter(inc, 0, schedule_job, (cmd, inc))
     schedule.run()
 
 
+# 发送舆情平台日报
 def send_yuqing_mail(is_test):
     sub, html = service.make_statistic(9)
     send_mail_with_html(sub, html, is_test=is_test)

@@ -49,6 +49,10 @@ def draw_graphic(df=read_data(EXCEL_FILE_NAME)):
     pie_data.plot(kind='pie', y=TOTAL_NAME, figsize=(6, 6))
     plt.savefig(PIE_IMAGE_NAME)
 
+    # 避免折线图日期太多过于拥挤
+    if len(df) > 60:
+        df = df.loc[len(df) - 60:]
+
     line_data = df[[STUCK_NAME, DANMU_NAME, CRASH_NAME]]
     print line_data
     # 卡顿等问题的折线图
