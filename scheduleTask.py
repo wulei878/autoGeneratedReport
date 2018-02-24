@@ -98,7 +98,7 @@ def schedule_job(cmd, inc):
 
 
 def send_yuqing_mail(is_test):
-    sub, html = service.make_statistic(8)
+    sub, html = service.make_statistic(9)
     send_mail_with_html(sub, html, is_test=is_test)
 
 

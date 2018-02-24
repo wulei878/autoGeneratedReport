@@ -118,7 +118,6 @@ def get_all_key_word_content(keyword_count, additon_key_word=''):
     device = []
     version = []
     # 循环获取关键词内容
-    tags.insert(0, u'卡')
     if len(additon_key_word) > 0:
         tags.insert(0, additon_key_word)
 
