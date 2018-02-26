@@ -10,7 +10,6 @@ VERSION_NAME = u'版本'
 IP_NAME = u'IP'
 UID_NAME = u'UID'
 TIME_NAME = u'时间'
-today = datetime.date.today()
 
 pd.set_option('display.max_colwidth', 0)
 
@@ -116,7 +115,7 @@ def make_email_html(sub, keywords, key_word_table, total_count, crash_count, stu
 def output_total_info(dic):
     df = pd.DataFrame(dic, columns=[TITLE_NAME, CONTENT_NAME, IP_NAME, UID_NAME, DEVICE_NAME, VERSION_NAME, TIME_NAME],
                       index=dic[INDEX_NAME])
-    df.to_excel(get_file_path(tail='.xlsx', date=today))
+    df.to_excel(get_file_path(tail='.xlsx', date=current_date()))
 
 
 # 处理所有的信息
@@ -140,7 +139,7 @@ def get_output_total_info_dic():
 
 # 输出新版本的问题列表
 def output_new_version_table(version):
-    df = pd.read_excel(get_file_path(tail='.xlsx', date=today))
+    df = pd.read_excel(get_file_path(tail='.xlsx', date=current_date()))
     temp_df = df[df[VERSION_NAME] == version]
     temp_df = temp_df.loc[:, [TITLE_NAME, CONTENT_NAME, DEVICE_NAME, VERSION_NAME]]
     length_array = []
@@ -154,7 +153,8 @@ def output_new_version_table(version):
     html = temp_df.to_html(index=False, classes='newVersionTable')
 
     temp_df.set_index(INDEX_NAME)
-    temp_df.to_excel(get_file_path(tail='_' + convert_to_utf8(str(version)) + '.xlsx', date=today), index=False)
+    temp_df.to_excel(get_file_path(tail='_' + convert_to_utf8(str(version)) + '.xlsx', date=current_date()),
+                     index=False)
     return convert_to_utf8(html)
 
 
@@ -196,7 +196,7 @@ def get_file_prefix_name(tail='.txt', date=datetime.datetime.today()):
 
 # 获取概要内容的额外信息，手动输入的
 def get_additions():
-    path = get_file_path('_additions.txt', today)
+    path = get_file_path('_additions.txt', current_date())
     if not os.path.exists(path):
         print '今日无额外的概要内容！！！'
         additions = []
@@ -212,10 +212,14 @@ def get_additions():
 
 # 创建明天的额外信息文档
 def create_next_day_additions_file():
-    path = get_file_path('_additions.txt', today + datetime.timedelta(days=1))
+    path = get_file_path('_additions.txt', current_date() + datetime.timedelta(days=1))
     if not os.path.exists(path):
         f = open(path, 'w')
         f.close()
+
+
+def current_date():
+    return datetime.date.today()
 
 
 if __name__ == '__main__':

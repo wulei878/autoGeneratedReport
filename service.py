@@ -22,7 +22,7 @@ keyword_label_array = [draw_graphic.STUCK_NAME,
 def get_info():
     page = 1
     max_page = 100
-    f = open(utils.get_file_path(date=utils.today), 'w')
+    f = open(utils.get_file_path(date=utils.current_date()), 'w')
     dic = utils.get_output_total_info_dic()
     while page <= max_page:
         print str(page)
@@ -111,7 +111,7 @@ def get_all_key_word_content(keyword_count, additon_key_word=''):
     global problemIDs
     problemIDs = []
     # 使用结巴分词得到关键词
-    tags = extract_tags.get_topK_words(utils.get_file_path(date=utils.today), keyword_count)
+    tags = extract_tags.get_topK_words(utils.get_file_path(date=utils.current_date()), keyword_count)
 
     titles = []
     contents = []
@@ -157,7 +157,7 @@ def get_start_time(date=None):
 # 所有问题的excel表格文件名
 def totoal_info_excel_file_name():
     tail = '.xlsx'
-    date = utils.today
+    date = utils.current_date()
     return utils.get_file_path(tail, date), utils.get_file_prefix_name(tail, date)
 
 
@@ -199,11 +199,11 @@ def out_put_today_statistic(today):
 # 开始统计工作
 def make_statistic(topK, is_test=False):
     # 获得开始时间参数
-    get_start_time(utils.today)
+    get_start_time(utils.current_date())
     # 获取全部信息，保存为xlsx表格用于附件发送，保存标题和内容信息用于提取关键词
     get_info()
     # 输出卡顿等特征值表格和图表，返回卡顿等数目
-    stuck, danmu, crash, total = out_put_today_statistic(utils.today)
+    stuck, danmu, crash, total = out_put_today_statistic(utils.current_date())
     # 添加额外关键词
     additon_keyword = ''
     # 如果有闪退的反馈，增加闪退关键词
@@ -216,7 +216,7 @@ def make_statistic(topK, is_test=False):
     # 邮件主题
     sub = 'iOS组-舆情平台日报'
     # 邮件的内容html文件
-    html = utils.make_email_html(sub + utils.today.strftime(" %Y.%m.%d"), key_words, key_word_table,
+    html = utils.make_email_html(sub + utils.current_date().strftime(" %Y.%m.%d"), key_words, key_word_table,
                                  str(total),
                                  str(crash), str(stuck), str(danmu), new_version_table=new_version_html)
     # 生成明日的额外概要内容文件
