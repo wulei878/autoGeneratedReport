@@ -219,7 +219,7 @@ def create_next_day_additions_file():
 
 
 def current_date():
-    return datetime.date.today()
+    return datetime.date.today() - datetime.tim
 
 
 if __name__ == '__main__':

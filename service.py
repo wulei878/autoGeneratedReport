@@ -78,32 +78,38 @@ def get_key_words_content(key_words):
 
     while page <= max_page:
         url = "http://yuqing.dz11.com/Home/Nav/getUserFeedbackList?channel=ios&keywords=" + key_words + "&startTime=" + start_time + "%2000%3A00%3A00&endTime=" + end_time + "%2023%3A59%3A59&pageNum=1&pageSize=20"
-        print "当前请求URL: " + url
-        try:
-            request = urllib2.Request(url)
-            response = urllib2.urlopen(request)
-            result = json.loads(response.read().decode('utf-8'))
-            max_page = int(result['data']['total']) / 20 + 1
-            page += 1
-            for record in result['data']['records']:
-                content = utils.convert_to_utf8(record['content'])
-                id = utils.convert_to_utf8(record['id'])
-                if len(content) > len(max_length_content) and id not in problemIDs:
-                    max_length_content = content
-                    title = utils.convert_to_utf8(record['title'])
-                    device = utils.convert_to_utf8(record['ua'])
-                    version = utils.convert_to_utf8(record['version'])
-                    max_length_id = id
-
-        except urllib2.URLError, e:
-            if hasattr(e, "code"):
-                print e.code
-            if hasattr(e, "reason"):
-                print e.reason
+        result = send_request(url)
+        max_page = int(result['data']['total']) / 20 + 1
+        page += 1
+        for record in result['data']['records']:
+            content = utils.convert_to_utf8(record['content'])
+            id = utils.convert_to_utf8(record['id'])
+            if len(content) > len(max_length_content) and id not in problemIDs:
+                max_length_content = content
+                title = utils.convert_to_utf8(record['title'])
+                device = utils.convert_to_utf8(record['ua'])
+                version = utils.convert_to_utf8(record['version'])
+                max_length_id = id
 
     problemIDs.append(max_length_id)
     print title, max_length_content, device, version
     return title, max_length_content, device, version
+
+
+def send_request(url):
+    print "当前请求URL: " + url
+    try:
+        request = urllib2.Request(url)
+        request.add_header('User-Agent',
+                           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36')
+        response = urllib2.urlopen(request)
+        result = json.loads(response.read().decode('utf-8'))
+        return result
+    except urllib2.URLError, e:
+        if hasattr(e, "code"):
+            print e.code
+        if hasattr(e, "reason"):
+            print e.reason
 
 
 # 批量获取所有关键词的内容
@@ -225,5 +231,5 @@ def make_statistic(topK, is_test=False):
 
 
 if __name__ == '__main__':
-    get_start_time()
+    get_start_time(utils.current_date())
     get_all_key_word_content(8)
