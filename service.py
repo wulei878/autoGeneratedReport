@@ -93,7 +93,7 @@ def get_key_words_content(key_words):
 
     problemIDs.append(max_length_id)
     print title, max_length_content, device, version
-    return title, max_length_content, device, version
+    return title, max_length_content, device, version, max_length_id
 
 
 def send_request(url):
@@ -123,24 +123,25 @@ def get_all_key_word_content(keyword_count, additon_key_word=''):
     contents = []
     device = []
     version = []
+    ids = []
     # 循环获取关键词内容
     if len(additon_key_word) > 0:
         tags.insert(0, additon_key_word)
 
     keywords = ",".join(tags).encode('utf-8')
     for tag in tags:
-        title, content, dev, ver = get_key_words_content(utils.convert_to_utf8(tag))
+        title, content, dev, ver, index_id = get_key_words_content(utils.convert_to_utf8(tag))
         if content is None or len(content) == 0:
             continue
         titles.append(title)
         contents.append(content)
         device.append(dev)
         version.append(ver)
-
+        ids.append(index_id)
     label_array = [utils.TITLE_NAME, utils.CONTENT_NAME, utils.DEVICE_NAME, utils.VERSION_NAME]
     key_word_table = utils.output_keyword_table(
         {label_array[0]: titles, label_array[1]: contents, label_array[2]: device, label_array[3]: version},
-        label_array)
+        label_array, ids)
     return key_word_table, keywords
 
 

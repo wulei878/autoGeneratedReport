@@ -148,22 +148,19 @@ def output_new_version_table(version):
 
     temp_df.insert(4, 'length', length_array)
     temp_df = temp_df.nlargest(10, 'length')
-    temp_df.insert(0, INDEX_NAME, range(1, len(temp_df) + 1))
-    temp_df = temp_df.loc[:, INDEX_NAME:VERSION_NAME]
-    html = temp_df.to_html(index=False, classes='newVersionTable')
-
-    temp_df.set_index(INDEX_NAME)
-    temp_df.to_excel(get_file_path(tail='_' + convert_to_utf8(str(version)) + '.xlsx', date=current_date()),
-                     index=False)
+    temp_df = temp_df.loc[:, TITLE_NAME:VERSION_NAME]
+    html = temp_df.to_html(classes='newVersionTable')
+    print html
+    temp_df.to_excel(get_file_path(tail='_' + convert_to_utf8(str(version)) + '.xlsx', date=current_date()))
     return convert_to_utf8(html)
 
 
 # 输出关键字问题的列表
-def output_keyword_table(dic, columns):
-    df = pd.DataFrame(dic, columns=columns)
-    df.insert(0, INDEX_NAME, range(1, len(df) + 1))
-    df = df.loc[:, INDEX_NAME:VERSION_NAME]
-    html = df.to_html(index=False, classes='keywordTable')
+def output_keyword_table(dic, columns, index):
+    df = pd.DataFrame(dic, columns=columns, index=index)
+    print df
+    df = df.loc[:, TITLE_NAME:VERSION_NAME]
+    html = df.to_html(classes='keywordTable')
     return convert_to_utf8(html)
 
 
@@ -219,8 +216,8 @@ def create_next_day_additions_file():
 
 
 def current_date():
-    return datetime.date.today() - datetime.tim
+    return datetime.date.today() - datetime.timedelta(days=1)
 
 
 if __name__ == '__main__':
-    output_new_version_table()
+    output_new_version_table(3.630)

@@ -79,7 +79,7 @@ def send_mail_with_html(sub, html, is_test=False):
 def time_to_sleep():
     from datetime import datetime
     cur_time = datetime.now()
-    des_time = cur_time.replace(hour=20, minute=0, second=0, microsecond=0)
+    des_time = cur_time.replace(hour=23, minute=50, second=0, microsecond=0)
     delta = (des_time - cur_time).total_seconds()
     if delta > 0:
         skip_seconds = delta
