@@ -12,6 +12,7 @@ VERSION_NAME = u'版本'
 IP_NAME = u'IP'
 UID_NAME = u'UID'
 TIME_NAME = u'时间'
+STATUS_NAME = u'状态'
 PROBLEMS_FOLLOW_UP_FILE = 'Resources/problems_follow_up.xlsx'
 
 pd.set_option('display.max_colwidth', 0)
@@ -60,7 +61,7 @@ def make_email_html(sub, keywords, key_word_table, total_count, crash_count, stu
         """
 
     css_style = """<style type="text/css">
-        .keywordTable, .newVersionTable {
+        .table {
             font-family: verdana,arial,sans-serif;
             font-size:14px;
             color:#333333;
@@ -69,16 +70,16 @@ def make_email_html(sub, keywords, key_word_table, total_count, crash_count, stu
             border-collapse: collapse;
             width:1000px;
         }
-        .keywordTable tr, .newVersionTable tr{
+        .table tr{
             text-align: center !important;
         }
-        .keywordTable th, .newVersionTable th {
+        .table th {
             border-width: 1px;
             padding: 8px;
             border-style: solid;
             border-color: #a9c6c9;
         }
-        .keywordTable td, .newVersionTable td {
+        .table td {
             border-width: 1px;
             padding: 8px;
             border-style: solid;
@@ -104,6 +105,8 @@ def make_email_html(sub, keywords, key_word_table, total_count, crash_count, stu
       """ + new_version_table + """
         <p><strong>主要问题详情</strong></p>
       """ + key_word_table + """
+        <p><strong>反馈问题追踪</strong></p>
+      """ + output_problems_follow_up_table() + """
         """ + image_info + """
       </div>
     </div>
@@ -152,7 +155,7 @@ def output_new_version_table(version):
     temp_df.insert(4, 'length', length_array)
     temp_df = temp_df.nlargest(10, 'length')
     temp_df = temp_df.loc[:, TITLE_NAME:VERSION_NAME]
-    html = temp_df.to_html(classes='newVersionTable')
+    html = temp_df.to_html(classes='table')
     temp_df.to_excel(get_file_path(tail='_' + convert_to_utf8(str(version)) + '.xlsx', date=current_date()))
     return convert_to_utf8(html), temp_df.index.values
 
@@ -161,8 +164,15 @@ def output_new_version_table(version):
 def output_keyword_table(dic, columns, index):
     df = pd.DataFrame(dic, columns=columns, index=index)
     df = df.loc[:, TITLE_NAME:VERSION_NAME]
-    html = df.to_html(classes='keywordTable')
+    html = df.to_html(classes='table')
     df.to_excel(get_file_path(tail='_keywords' + '.xlsx', date=current_date()))
+    return convert_to_utf8(html)
+
+
+# 输出问题追踪的列表
+def output_problems_follow_up_table(file_path=PROBLEMS_FOLLOW_UP_FILE):
+    df = pd.read_excel(file_path)
+    html = df.to_html(classes='table')
     return convert_to_utf8(html)
 
 
@@ -241,10 +251,18 @@ def add_problems_follow_up(index_id, folder_path='2018'):
 
             try:
                 problems_df = problems_df.append(df[[CONTENT_NAME, VERSION_NAME]], verify_integrity=True)
+                problems_df.loc[index_id, [STATUS_NAME]] = '排查中'
                 problems_df.to_excel(PROBLEMS_FOLLOW_UP_FILE)
             except:
                 print '相同的问题已存在！'
                 break
+
+
+def add_problems_follow_up_status(index_id,status):
+    problems_df = pd.read_excel(PROBLEMS_FOLLOW_UP_FILE)
+    problems_df.loc[index_id,[STATUS_NAME]] = status
+    problems_df.to_excel(PROBLEMS_FOLLOW_UP_FILE)
+    print problems_df
 
 
 def current_date():
@@ -252,11 +270,16 @@ def current_date():
 
 
 def main():
-    USAGE = "usage:    python utils.py -i [index]"
+    USAGE = "usage:    python utils.py -i [index] -a [status]"
     parser = OptionParser(USAGE)
     parser.add_option("-i", dest="index")
+    parser.add_option("-a", dest="status")
     opt, args = parser.parse_args()
-    if opt.index is not None:
+    if opt.status is not None and opt.index is not None:
+        index = int(opt.index)
+        status = opt.status
+        add_problems_follow_up_status(index,status)
+    elif opt.index is not None:
         index = int(opt.index)
         add_problems_follow_up(index)
 
