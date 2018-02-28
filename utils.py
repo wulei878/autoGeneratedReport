@@ -105,8 +105,6 @@ def make_email_html(sub, keywords, key_word_table, total_count, crash_count, stu
       """ + new_version_table + """
         <p><strong>主要问题详情</strong></p>
       """ + key_word_table + """
-        <p><strong>反馈问题追踪</strong></p>
-      """ + output_problems_follow_up_table() + """
         """ + image_info + """
       </div>
     </div>
