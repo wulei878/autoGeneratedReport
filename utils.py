@@ -1,4 +1,6 @@
 # -*- coding: UTF-8 -*-
+from optparse import OptionParser
+
 import pandas as pd
 import os, datetime
 
@@ -10,6 +12,7 @@ VERSION_NAME = u'版本'
 IP_NAME = u'IP'
 UID_NAME = u'UID'
 TIME_NAME = u'时间'
+PROBLEMS_FOLLOW_UP_FILE = 'Resources/problems_follow_up.xlsx'
 
 pd.set_option('display.max_colwidth', 0)
 
@@ -150,17 +153,16 @@ def output_new_version_table(version):
     temp_df = temp_df.nlargest(10, 'length')
     temp_df = temp_df.loc[:, TITLE_NAME:VERSION_NAME]
     html = temp_df.to_html(classes='newVersionTable')
-    print html
     temp_df.to_excel(get_file_path(tail='_' + convert_to_utf8(str(version)) + '.xlsx', date=current_date()))
-    return convert_to_utf8(html)
+    return convert_to_utf8(html), temp_df.index.values
 
 
 # 输出关键字问题的列表
 def output_keyword_table(dic, columns, index):
     df = pd.DataFrame(dic, columns=columns, index=index)
-    print df
     df = df.loc[:, TITLE_NAME:VERSION_NAME]
     html = df.to_html(classes='keywordTable')
+    df.to_excel(get_file_path(tail='_keywords' + '.xlsx', date=current_date()))
     return convert_to_utf8(html)
 
 
@@ -215,9 +217,50 @@ def create_next_day_additions_file():
         f.close()
 
 
+def gci(path, file_names):
+    parents = os.listdir(path)
+    for parent in parents:
+        child = os.path.join(path, parent)
+        if os.path.isdir(child):
+            gci(child, file_names)
+        else:
+            file_names.append(child)
+
+
+def add_problems_follow_up(index_id, folder_path='2018'):
+    file_names = []
+    gci(folder_path, file_names)
+    for file_name in file_names:
+        if file_name.find('_yuqing.xlsx') > 0:
+            df = pd.read_excel(file_name)
+            try:
+                problems_df = pd.read_excel(PROBLEMS_FOLLOW_UP_FILE)
+                df = df.loc[index_id]
+            except:
+                continue
+
+            try:
+                problems_df = problems_df.append(df[[CONTENT_NAME, VERSION_NAME]], verify_integrity=True)
+                problems_df.to_excel(PROBLEMS_FOLLOW_UP_FILE)
+            except:
+                print '相同的问题已存在！'
+                break
+
+
 def current_date():
-    return datetime.date.today() - datetime.timedelta(days=1)
+    return datetime.date.today()
+
+
+def main():
+    USAGE = "usage:    python utils.py -i [index]"
+    parser = OptionParser(USAGE)
+    parser.add_option("-i", dest="index")
+    opt, args = parser.parse_args()
+    if opt.index is not None:
+        index = int(opt.index)
+        add_problems_follow_up(index)
 
 
 if __name__ == '__main__':
-    output_new_version_table(3.630)
+    main()
+    # output_new_version_table(3.630)

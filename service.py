@@ -83,7 +83,7 @@ def get_key_words_content(key_words):
         page += 1
         for record in result['data']['records']:
             content = utils.convert_to_utf8(record['content'])
-            id = utils.convert_to_utf8(record['id'])
+            id = int(utils.convert_to_utf8(record['id']))
             if len(content) > len(max_length_content) and id not in problemIDs:
                 max_length_content = content
                 title = utils.convert_to_utf8(record['title'])
@@ -100,8 +100,6 @@ def send_request(url):
     print "当前请求URL: " + url
     try:
         request = urllib2.Request(url)
-        request.add_header('User-Agent',
-                           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36')
         response = urllib2.urlopen(request)
         result = json.loads(response.read().decode('utf-8'))
         return result
@@ -114,8 +112,6 @@ def send_request(url):
 
 # 批量获取所有关键词的内容
 def get_all_key_word_content(keyword_count, additon_key_word=''):
-    global problemIDs
-    problemIDs = []
     # 使用结巴分词得到关键词
     tags = extract_tags.get_topK_words(utils.get_file_path(date=utils.current_date()), keyword_count)
 
@@ -203,6 +199,12 @@ def out_put_today_statistic(today):
     return stuck, danmu, crash, total
 
 
+def add_new_version_problems_into_problems_list(new_version_problems):
+    global problemIDs
+    problemIDs = []
+    problemIDs.extend(new_version_problems)
+
+
 # 开始统计工作
 def make_statistic(topK, is_test=False):
     # 获得开始时间参数
@@ -211,6 +213,10 @@ def make_statistic(topK, is_test=False):
     get_info()
     # 输出卡顿等特征值表格和图表，返回卡顿等数目
     stuck, danmu, crash, total = out_put_today_statistic(utils.current_date())
+    # 获取最新版本的问题反馈
+    new_version_html,new_version_problems = utils.output_new_version_table(NEW_VERSION)
+    # 将新版本的问题id添加到问题id list中
+    add_new_version_problems_into_problems_list(new_version_problems)
     # 添加额外关键词
     additon_keyword = ''
     # 如果有闪退的反馈，增加闪退关键词
@@ -218,8 +224,6 @@ def make_statistic(topK, is_test=False):
         additon_keyword = u'闪退'
     # 获取所有关键词的推荐内容
     key_word_table, key_words = get_all_key_word_content(topK, additon_keyword)
-    # 获取最新版本的问题反馈
-    new_version_html = utils.output_new_version_table(NEW_VERSION)
     # 邮件主题
     sub = 'iOS组-舆情平台日报'
     # 邮件的内容html文件
